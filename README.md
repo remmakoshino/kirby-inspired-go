@@ -1,6 +1,7 @@
 # Kirby-Inspired RPG 🌟
 
 星のカービィにインスパイアされた2D RPGゲームです。Go言語とPixelライブラリを使用して開発されています。
+<img width="849" height="491" alt="image" src="https://github.com/user-attachments/assets/b25f8ea4-056d-46c0-bb40-d1ed740ee22e" />
 
 ![Go Version](https://img.shields.io/badge/Go-1.18+-00ADD8?logo=go)
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
