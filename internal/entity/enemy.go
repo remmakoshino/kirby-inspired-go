@@ -246,10 +246,6 @@ func (e *Enemy) drawJumper(imd *imdraw.IMDraw) {
 	// 本体（少し縦長）
 	imd.Color = e.Color
 	
-	// 楕円形の体
-	bodyTop := e.Position.Add(pixel.V(0, e.Radius*0.7))
-	bodyBottom := e.Position.Add(pixel.V(0, -e.Radius*0.7))
-	
 	imd.Push(e.Position)
 	imd.Circle(e.Radius*0.8, 0)
 	

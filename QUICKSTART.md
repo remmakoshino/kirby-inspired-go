@@ -16,14 +16,46 @@ cd kirby-inspired-go
 
 ### Step 2: 依存関係のインストール
 
-#### Linux (WSL含む)
+#### WSL2 / Linux (Ubuntu/Debian)
 
 ```bash
 # 必要なライブラリをインストール
 sudo apt-get update
-sudo apt-get install -y libgl1-mesa-dev xorg-dev
+sudo apt-get install -y \
+    libgl1-mesa-dev \
+    xorg-dev \
+    libx11-dev \
+    libxrandr-dev \
+    libxcursor-dev \
+    libxinerama-dev \
+    libxi-dev \
+    pkg-config
 
 # Go依存関係をダウンロード
+go mod download
+```
+
+**WSL2でのX11設定:**
+
+- **Windows 11**: WSLgが自動的に有効（追加設定不要）
+- **Windows 10**: VcXsrvをインストールし、以下を実行:
+
+```bash
+export DISPLAY=$(cat /etc/resolv.conf | grep nameserver | awk '{print $2}'):0
+```
+
+#### Linux (Fedora/RHEL)
+
+```bash
+sudo dnf install -y \
+    golang \
+    mesa-libGL-devel \
+    libX11-devel \
+    libXrandr-devel \
+    libXcursor-devel \
+    libXinerama-devel \
+    libXi-devel
+
 go mod download
 ```
 
@@ -101,7 +133,7 @@ go build -o bin/kirby-game ./cmd/game
 
 ```bash
 # Linux/WSL
-sudo apt-get install pkg-config libgl1-mesa-dev
+sudo apt-get install pkg-config libgl1-mesa-dev xorg-dev
 
 # macOS
 xcode-select --install
@@ -110,19 +142,34 @@ xcode-select --install
 **エラー: "X11/Xlib.h: No such file"**
 
 ```bash
-sudo apt-get install libx11-dev xorg-dev
+# Linux/WSL
+sudo apt-get install libx11-dev xorg-dev libxrandr-dev libxcursor-dev libxinerama-dev libxi-dev
 ```
 
 ### 実行エラー
 
 **WSLでウィンドウが表示されない**
 
+1. X11サーバーの確認:
 ```bash
-# X11サーバーの確認
+# DISPLAY環境変数の確認
 echo $DISPLAY
 
-# 設定されていない場合
+# 表示されない場合は設定
 export DISPLAY=:0
+```
+
+2. **Windows 11**: WSLgが有効か確認
+   - Windows Update で最新版に更新
+
+3. **Windows 10**: VcXsrvが起動しているか確認
+   - XLaunchを実行
+   - "Disable access control"にチェック
+
+**パーミッションエラー**
+
+```bash
+chmod +x bin/kirby-game
 ```
 
 ## 次のステップ 📚

@@ -6,6 +6,8 @@
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey)
 
+> **🪟 WSL2ユーザーの方へ**: [WSL2クイックセットアップ](#wsl2での環境構築windowsユーザー向け)を参照してください
+
 ---
 
 **📖 [クイックスタート](QUICKSTART.md)** | **🛠️ [開発ガイド](docs/DEVELOPMENT.md)** | **🤝 [コントリビューション](CONTRIBUTING.md)**
@@ -61,6 +63,52 @@
 
 ## 📦 インストール
 
+### WSL2での環境構築（Windowsユーザー向け）
+
+WSL2でゲームを実行する場合、X11ライブラリとグラフィックスライブラリが必要です。
+
+#### 1. 必要なライブラリをインストール
+
+```bash
+sudo apt-get update
+sudo apt-get install -y \
+    libgl1-mesa-dev \
+    xorg-dev \
+    libx11-dev \
+    libxrandr-dev \
+    libxcursor-dev \
+    libxinerama-dev \
+    libxi-dev \
+    pkg-config
+```
+
+#### 2. X11サーバーの設定
+
+**Windows 11の場合（WSLg）:**
+- Windows 11のWSL2には、WSLg（WSL GUI）が標準で含まれています
+- 追加設定なしでGUIアプリケーションが動作します
+
+**Windows 10の場合:**
+1. [VcXsrv](https://sourceforge.net/projects/vcxsrv/)をダウンロードしてインストール
+2. XLaunchを起動し、以下の設定で実行:
+   - Display number: 0
+   - Start no client: チェック
+   - Disable access control: チェック
+3. WSLで環境変数を設定:
+
+```bash
+export DISPLAY=$(cat /etc/resolv.conf | grep nameserver | awk '{print $2}'):0
+```
+
+永続化する場合は`~/.bashrc`に追加:
+
+```bash
+echo 'export DISPLAY=$(cat /etc/resolv.conf | grep nameserver | awk '"'"'{print $2}'"'"'):0' >> ~/.bashrc
+source ~/.bashrc
+```
+
+### 通常のインストール手順
+
 ### 1. リポジトリをクローン
 
 ```bash
@@ -77,20 +125,30 @@ go mod download
 ### 3. ゲームをビルド
 
 ```bash
-go build -o kirby-game ./cmd/game
+# Makefileを使用（推奨）
+make build
+
+# または直接ビルド
+go build -o bin/kirby-game ./cmd/game
 ```
 
 ### 4. ゲームを実行
 
 ```bash
-./kirby-game
-```
+# Makefileを使用
+make run
 
-または直接実行:
+# またはビルド済みバイナリを実行
+./bin/kirby-game
 
-```bash
+# または直接実行（ビルドなし）
 go run ./cmd/game
 ```
+
+**⚠️ WSL2で実行する場合の注意:**
+- X11サーバーが起動していることを確認してください
+- `echo $DISPLAY`でDISPLAY環境変数が設定されているか確認
+- ゲームウィンドウが表示されない場合は、上記のX11サーバー設定を確認してください
 
 ## 🎯 操作方法
 
@@ -164,6 +222,35 @@ kirby-inspired-go/
 - [ ] スプライトアニメーション
 
 ## 📝 開発メモ
+
+### WSL2でのビルドとトラブルシューティング
+
+**必要なパッケージ（WSL2/Linux）:**
+```bash
+sudo apt-get install -y \
+    libgl1-mesa-dev \
+    xorg-dev \
+    libx11-dev \
+    libxrandr-dev \
+    libxcursor-dev \
+    libxinerama-dev \
+    libxi-dev \
+    pkg-config
+```
+
+**X11サーバーの確認:**
+```bash
+# DISPLAY環境変数の確認
+echo $DISPLAY
+
+# X11サーバーが起動しているか確認
+ps aux | grep X
+```
+
+**ゲームウィンドウが表示されない場合:**
+1. X11サーバー（VcXsrvまたはWSLg）が起動しているか確認
+2. DISPLAY環境変数が設定されているか確認
+3. ファイアウォールでX11通信が許可されているか確認
 
 ### ビルドのトラブルシューティング
 
