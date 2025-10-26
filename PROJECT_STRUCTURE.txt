@@ -1,0 +1,30 @@
+.
+|-- CONTRIBUTING.md
+|-- LICENSE
+|-- Makefile
+|-- PROJECT_STRUCTURE.txt
+|-- README.md
+|-- assets
+|-- cmd
+|   `-- game
+|       `-- main.go
+|-- docs
+|   |-- DEVELOPMENT.md
+|   `-- GITHUB_PUBLISH.md
+|-- go.mod
+|-- go.sum
+|-- internal
+|   |-- ability
+|   |   |-- abilities.go
+|   |   `-- ability.go
+|   |-- entity
+|   |   |-- enemy.go
+|   |   `-- player.go
+|   |-- game
+|   |   `-- game.go
+|   `-- stage
+|       `-- stage.go
+`-- scripts
+    `-- publish-to-github.sh
+
+10 directories, 17 files
