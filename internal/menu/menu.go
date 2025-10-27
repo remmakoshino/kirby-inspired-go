@@ -170,10 +170,21 @@ func (m *MenuManager) Draw() {
 		m.drawStageSelect()
 	}
 	
+	// IMDrawを最後に描画（背景と図形）
 	m.IMDraw.Draw(m.Window)
+	
+	// テキストは別途描画（IMDrawの後）
+	switch m.State {
+	case StateTitleScreen:
+		m.drawTitleScreenText()
+	case StateCharacterSelect:
+		m.drawCharacterSelectText()
+	case StateStageSelect:
+		m.drawStageSelectText()
+	}
 }
 
-// drawTitleScreen はタイトル画面を描画
+// drawTitleScreen はタイトル画面の図形を描画
 func (m *MenuManager) drawTitleScreen() {
 	width := m.Window.Bounds().W()
 	height := m.Window.Bounds().H()
@@ -184,17 +195,46 @@ func (m *MenuManager) drawTitleScreen() {
 	m.IMDraw.Push(pixel.V(width, height))
 	m.IMDraw.Rectangle(0)
 	
+	// 選択カーソル
+	menuY := height / 2
+	if m.titleSelection == 0 {
+		m.IMDraw.Color = colornames.Yellow
+		m.IMDraw.Push(pixel.V(width/2-100, menuY+5))
+		m.IMDraw.Push(pixel.V(width/2-90, menuY+5))
+		m.IMDraw.Line(3)
+	}
+	
+	exitY := menuY - 60
+	if m.titleSelection == 1 {
+		m.IMDraw.Color = colornames.Yellow
+		m.IMDraw.Push(pixel.V(width/2-100, exitY+5))
+		m.IMDraw.Push(pixel.V(width/2-90, exitY+5))
+		m.IMDraw.Line(3)
+	}
+}
+
+// drawTitleScreenText はタイトル画面のテキストを描画
+func (m *MenuManager) drawTitleScreenText() {
+	width := m.Window.Bounds().W()
+	height := m.Window.Bounds().H()
+	
 	// タイトルロゴ
-	titleText := text.New(pixel.V(width/2-150, height-150), m.Atlas)
-	titleText.Color = colornames.White
+	titleText := text.New(pixel.V(width/2-200, height-150), m.Atlas)
+	titleText.Color = color.RGBA{R: 255, G: 105, B: 180, A: 255} // ピンク
 	fmt.Fprintf(titleText, "KIRBY ADVENTURE")
 	titleText.Draw(m.Window, pixel.IM.Scaled(titleText.Orig, 4))
 	
 	// サブタイトル
-	subText := text.New(pixel.V(width/2-100, height-200), m.Atlas)
+	subText := text.New(pixel.V(width/2-120, height-200), m.Atlas)
 	subText.Color = colornames.Yellow
-	fmt.Fprintf(subText, "Inspired RPG")
+	fmt.Fprintf(subText, "~ Inspired RPG ~")
 	subText.Draw(m.Window, pixel.IM.Scaled(subText.Orig, 2))
+	
+	// ウェルカムメッセージ
+	welcomeText := text.New(pixel.V(width/2-180, height-260), m.Atlas)
+	welcomeText.Color = colornames.White
+	fmt.Fprintf(welcomeText, "Press ENTER to start your adventure!")
+	welcomeText.Draw(m.Window, pixel.IM.Scaled(welcomeText.Orig, 1.8))
 	
 	// メニュー項目
 	menuY := height / 2
@@ -203,11 +243,6 @@ func (m *MenuManager) drawTitleScreen() {
 	startColor := colornames.White
 	if m.titleSelection == 0 {
 		startColor = colornames.Yellow
-		// 選択カーソル
-		m.IMDraw.Color = colornames.Yellow
-		m.IMDraw.Push(pixel.V(width/2-100, menuY+5))
-		m.IMDraw.Push(pixel.V(width/2-90, menuY+5))
-		m.IMDraw.Line(3)
 	}
 	startText := text.New(pixel.V(width/2-70, menuY), m.Atlas)
 	startText.Color = startColor
@@ -219,10 +254,6 @@ func (m *MenuManager) drawTitleScreen() {
 	exitColor := colornames.White
 	if m.titleSelection == 1 {
 		exitColor = colornames.Yellow
-		m.IMDraw.Color = colornames.Yellow
-		m.IMDraw.Push(pixel.V(width/2-100, exitY+5))
-		m.IMDraw.Push(pixel.V(width/2-90, exitY+5))
-		m.IMDraw.Line(3)
 	}
 	exitText := text.New(pixel.V(width/2-70, exitY), m.Atlas)
 	exitText.Color = exitColor
@@ -236,7 +267,7 @@ func (m *MenuManager) drawTitleScreen() {
 	instructionText.Draw(m.Window, pixel.IM.Scaled(instructionText.Orig, 1.5))
 }
 
-// drawCharacterSelect はキャラクター選択画面を描画
+// drawCharacterSelect はキャラクター選択画面の図形を描画
 func (m *MenuManager) drawCharacterSelect() {
 	width := m.Window.Bounds().W()
 	height := m.Window.Bounds().H()
@@ -246,12 +277,6 @@ func (m *MenuManager) drawCharacterSelect() {
 	m.IMDraw.Push(pixel.V(0, 0))
 	m.IMDraw.Push(pixel.V(width, height))
 	m.IMDraw.Rectangle(0)
-	
-	// タイトル
-	titleText := text.New(pixel.V(width/2-120, height-100), m.Atlas)
-	titleText.Color = colornames.Yellow
-	fmt.Fprintf(titleText, "SELECT CHARACTER")
-	titleText.Draw(m.Window, pixel.IM.Scaled(titleText.Orig, 3))
 	
 	// カービィ
 	kirbyX := width/2 - 200
@@ -269,11 +294,6 @@ func (m *MenuManager) drawCharacterSelect() {
 	m.IMDraw.Color = color.RGBA{R: 255, G: 182, B: 193, A: 255}
 	m.IMDraw.Push(pixel.V(kirbyX, kirbyY))
 	m.IMDraw.Circle(40, 0)
-	
-	kirbyNameText := text.New(pixel.V(kirbyX-30, kirbyY-120), m.Atlas)
-	kirbyNameText.Color = colornames.White
-	fmt.Fprintf(kirbyNameText, "KIRBY")
-	kirbyNameText.Draw(m.Window, pixel.IM.Scaled(kirbyNameText.Orig, 2))
 	
 	// メタナイト
 	metaX := width/2 + 200
@@ -302,11 +322,64 @@ func (m *MenuManager) drawCharacterSelect() {
 	m.IMDraw.Color = colornames.Yellow
 	m.IMDraw.Push(pixel.V(metaX, metaY+5))
 	m.IMDraw.Circle(8, 0)
+}
+
+// drawCharacterSelectText はキャラクター選択画面のテキストを描画
+func (m *MenuManager) drawCharacterSelectText() {
+	width := m.Window.Bounds().W()
+	height := m.Window.Bounds().H()
+	
+	// タイトル
+	titleText := text.New(pixel.V(width/2-160, height-80), m.Atlas)
+	titleText.Color = colornames.Yellow
+	fmt.Fprintf(titleText, "SELECT CHARACTER")
+	titleText.Draw(m.Window, pixel.IM.Scaled(titleText.Orig, 3))
+	
+	// 説明文
+	descText := text.New(pixel.V(width/2-280, height-130), m.Atlas)
+	descText.Color = colornames.White
+	fmt.Fprintf(descText, "Choose your hero! Each character has unique abilities.")
+	descText.Draw(m.Window, pixel.IM.Scaled(descText.Orig, 1.5))
+	
+	// カービィ
+	kirbyX := width/2 - 200
+	kirbyY := height / 2
+	
+	kirbyNameText := text.New(pixel.V(kirbyX-30, kirbyY-120), m.Atlas)
+	kirbyNameText.Color = colornames.White
+	fmt.Fprintf(kirbyNameText, "KIRBY")
+	kirbyNameText.Draw(m.Window, pixel.IM.Scaled(kirbyNameText.Orig, 2))
+	
+	// カービィの説明
+	kirbyDescText := text.New(pixel.V(kirbyX-80, kirbyY+70), m.Atlas)
+	kirbyDescText.Color = color.RGBA{R: 255, G: 192, B: 203, A: 255}
+	fmt.Fprintf(kirbyDescText, "Copy Ability")
+	kirbyDescText.Draw(m.Window, pixel.IM.Scaled(kirbyDescText.Orig, 1.3))
+	
+	kirbyDesc2Text := text.New(pixel.V(kirbyX-70, kirbyY+50), m.Atlas)
+	kirbyDesc2Text.Color = colornames.Lightgray
+	fmt.Fprintf(kirbyDesc2Text, "Versatile!")
+	kirbyDesc2Text.Draw(m.Window, pixel.IM.Scaled(kirbyDesc2Text.Orig, 1.2))
+	
+	// メタナイト
+	metaX := width/2 + 200
+	metaY := height / 2
 	
 	metaNameText := text.New(pixel.V(metaX-50, metaY-120), m.Atlas)
 	metaNameText.Color = colornames.White
 	fmt.Fprintf(metaNameText, "META KNIGHT")
 	metaNameText.Draw(m.Window, pixel.IM.Scaled(metaNameText.Orig, 2))
+	
+	// メタナイトの説明
+	metaDescText := text.New(pixel.V(metaX-80, metaY+70), m.Atlas)
+	metaDescText.Color = color.RGBA{R: 147, G: 112, B: 219, A: 255}
+	fmt.Fprintf(metaDescText, "Sword Master")
+	metaDescText.Draw(m.Window, pixel.IM.Scaled(metaDescText.Orig, 1.3))
+	
+	metaDesc2Text := text.New(pixel.V(metaX-60, metaY+50), m.Atlas)
+	metaDesc2Text.Color = colornames.Lightgray
+	fmt.Fprintf(metaDesc2Text, "Powerful!")
+	metaDesc2Text.Draw(m.Window, pixel.IM.Scaled(metaDesc2Text.Orig, 1.2))
 	
 	// 操作説明
 	instructionText := text.New(pixel.V(width/2-200, 50), m.Atlas)
@@ -315,7 +388,7 @@ func (m *MenuManager) drawCharacterSelect() {
 	instructionText.Draw(m.Window, pixel.IM.Scaled(instructionText.Orig, 1.5))
 }
 
-// drawStageSelect はステージ選択画面を描画
+// drawStageSelect はステージ選択画面の図形を描画
 func (m *MenuManager) drawStageSelect() {
 	width := m.Window.Bounds().W()
 	height := m.Window.Bounds().H()
@@ -325,12 +398,6 @@ func (m *MenuManager) drawStageSelect() {
 	m.IMDraw.Push(pixel.V(0, 0))
 	m.IMDraw.Push(pixel.V(width, height))
 	m.IMDraw.Rectangle(0)
-	
-	// タイトル
-	titleText := text.New(pixel.V(width/2-100, height-100), m.Atlas)
-	titleText.Color = colornames.Cyan
-	fmt.Fprintf(titleText, "SELECT STAGE")
-	titleText.Draw(m.Window, pixel.IM.Scaled(titleText.Orig, 3))
 	
 	// ステージ1
 	stage1X := width/2 - 200
@@ -349,16 +416,6 @@ func (m *MenuManager) drawStageSelect() {
 	m.IMDraw.Push(pixel.V(stage1X+50, stage1Y+30))
 	m.IMDraw.Rectangle(0)
 	
-	stage1Text := text.New(pixel.V(stage1X-40, stage1Y-80), m.Atlas)
-	stage1Text.Color = colornames.White
-	fmt.Fprintf(stage1Text, "STAGE 1")
-	stage1Text.Draw(m.Window, pixel.IM.Scaled(stage1Text.Orig, 2))
-	
-	bossText1 := text.New(pixel.V(stage1X-60, stage1Y-110), m.Atlas)
-	bossText1.Color = colornames.Red
-	fmt.Fprintf(bossText1, "Boss: Dedede")
-	bossText1.Draw(m.Window, pixel.IM.Scaled(bossText1.Orig, 1.5))
-	
 	// ステージ2
 	stage2X := width/2 + 200
 	stage2Y := height / 2
@@ -375,11 +432,59 @@ func (m *MenuManager) drawStageSelect() {
 	m.IMDraw.Push(pixel.V(stage2X-50, stage2Y-30))
 	m.IMDraw.Push(pixel.V(stage2X+50, stage2Y+30))
 	m.IMDraw.Rectangle(0)
+}
+
+// drawStageSelectText はステージ選択画面のテキストを描画
+func (m *MenuManager) drawStageSelectText() {
+	width := m.Window.Bounds().W()
+	height := m.Window.Bounds().H()
+	
+	// タイトル
+	titleText := text.New(pixel.V(width/2-140, height-80), m.Atlas)
+	titleText.Color = colornames.Cyan
+	fmt.Fprintf(titleText, "SELECT STAGE")
+	titleText.Draw(m.Window, pixel.IM.Scaled(titleText.Orig, 3))
+	
+	// 説明文
+	descText := text.New(pixel.V(width/2-220, height-130), m.Atlas)
+	descText.Color = colornames.White
+	fmt.Fprintf(descText, "Pick your battlefield and face the boss!")
+	descText.Draw(m.Window, pixel.IM.Scaled(descText.Orig, 1.5))
+	
+	// ステージ1
+	stage1X := width/2 - 200
+	stage1Y := height / 2
+	
+	stage1Text := text.New(pixel.V(stage1X-40, stage1Y-80), m.Atlas)
+	stage1Text.Color = colornames.White
+	fmt.Fprintf(stage1Text, "STAGE 1")
+	stage1Text.Draw(m.Window, pixel.IM.Scaled(stage1Text.Orig, 2))
+	
+	// ステージ1の説明
+	stage1DescText := text.New(pixel.V(stage1X-60, stage1Y+50), m.Atlas)
+	stage1DescText.Color = colornames.Lightgreen
+	fmt.Fprintf(stage1DescText, "Dedede Castle")
+	stage1DescText.Draw(m.Window, pixel.IM.Scaled(stage1DescText.Orig, 1.3))
+	
+	bossText1 := text.New(pixel.V(stage1X-60, stage1Y-110), m.Atlas)
+	bossText1.Color = colornames.Red
+	fmt.Fprintf(bossText1, "Boss: Dedede")
+	bossText1.Draw(m.Window, pixel.IM.Scaled(bossText1.Orig, 1.5))
+	
+	// ステージ2
+	stage2X := width/2 + 200
+	stage2Y := height / 2
 	
 	stage2Text := text.New(pixel.V(stage2X-40, stage2Y-80), m.Atlas)
 	stage2Text.Color = colornames.White
 	fmt.Fprintf(stage2Text, "STAGE 2")
 	stage2Text.Draw(m.Window, pixel.IM.Scaled(stage2Text.Orig, 2))
+	
+	// ステージ2の説明
+	stage2DescText := text.New(pixel.V(stage2X-70, stage2Y+50), m.Atlas)
+	stage2DescText.Color = color.RGBA{R: 147, G: 112, B: 219, A: 255}
+	fmt.Fprintf(stage2DescText, "Halberd Warship")
+	stage2DescText.Draw(m.Window, pixel.IM.Scaled(stage2DescText.Orig, 1.3))
 	
 	bossText2 := text.New(pixel.V(stage2X-70, stage2Y-110), m.Atlas)
 	bossText2.Color = colornames.Purple
